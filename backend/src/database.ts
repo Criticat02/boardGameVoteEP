@@ -1,12 +1,10 @@
 import { Database } from 'bun:sqlite';
 
-export const db = new Database('./sql/mydb.sqlite');
-
-export const setupDatabase = async (): Promise<void> => {
-  try {
-    db.run("create table if not exists games (id integer primary key autoincrement, name text not null);")
-    db.run("create table if not exists votes (id integer primary key autoincrement, game_id integer not null, user_name text not null);");  
-  } catch (error) {
-    console.log(error);
-  }
+export const setupDatabase = async (): Promise<Database> => {
+  const db = new Database('./sql/mydb.sqlite');
+  db.run("CREATE TABLE IF NOT EXISTS games (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL);");
+  db.run("CREATE TABLE IF NOT EXISTS votes (id INTEGER PRIMARY KEY AUTOINCREMENT, game_name TEXT NOT NULL, user_name TEXT NOT NULL);");
+  return db;
 };
+
+export const db = await setupDatabase();
