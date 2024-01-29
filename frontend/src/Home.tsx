@@ -4,8 +4,8 @@ import './App.css';
 
 function HomePage({user: { username }}: { user: { username: string } }) {
   const [gamename, setGamename] = useState<string>('');
-  const [responseMessage, setResponseMessage] = useState<string>("");
-  const [winningGame, setWinningGame] = useState<string>("");
+  const [responseMessage, setResponseMessage] = useState<string | null>(null);
+  const [winningGame, setWinningGame] = useState<string | null>(null);
 
   const HandleVoteSubmit = async (event: React.FormEvent<HTMLFormElement>) => {  
 
@@ -57,14 +57,20 @@ function HomePage({user: { username }}: { user: { username: string } }) {
         credentials: 'include',
       });
 
-      const data = await response.json() as ApiResponse;
 
-      if (response.status === 200 && data.gamename) {
-        setWinningGame(data.gamename);
+      if (response.status === 200) {
+        const data = await response.json() as ApiResponse;
+        if (data.gamename) {
+          setWinningGame(data.gamename);
+        } else {
+          setWinningGame(null);
+          setResponseMessage('No votes found. Please try again later.')
+        }
       } else if (response.status === 404) {
-        setResponseMessage('Game could not be found in the databse');
+        setWinningGame(null);
+        setResponseMessage('No votes found. Please try again later.');
       } else {
-        setResponseMessage('Error submitting game. Please try again.');
+        setResponseMessage('Error retrieving data. Please try again.');
       }
     } catch (error) {
       console.error('Error:', error);
@@ -134,7 +140,7 @@ function HomePage({user: { username }}: { user: { username: string } }) {
       <header className="App-body">
         <b className='App-label-bckg'>
           <label>
-            <b>Enter the name of the game you wish to vote for or add to the list:</b>
+            <b>Enter the name of the game you wish to vote for, add to the list or remove from the list:</b>
             <br />
             <input
               type="text"
