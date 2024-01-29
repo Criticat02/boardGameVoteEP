@@ -1,6 +1,6 @@
 // game.ts
 
-import { db } from './database.ts';
+import db from './database.ts';
 import { corsHeaders } from './config.ts';
 
 export async function addGame(req: Request): Promise<Response> {
@@ -12,13 +12,15 @@ export async function addGame(req: Request): Promise<Response> {
     if (!gamename) {
       return new Response("Game name is required", { status: 400, ...corsHeaders });
     }
-    
+
+    gamename.trim().toLowerCase();
+
     const row = db.query("SELECT * FROM games WHERE name = ?").get(gamename);
 
     if (row) {
       return new Response("Game already exists in database", { status: 409, ...corsHeaders });
     } else {
-      db.run("INSERT INTO games (name) VALUES (?)", [gamename]);
+      db.query("INSERT INTO games (name) VALUES (?)").run(gamename);
       return new Response("Game added!", { status: 201, ...corsHeaders });
     }
   } catch (error) {
@@ -37,12 +39,15 @@ export async function removeGame(req: Request): Promise<Response> {
       return new Response("Game name is required", { status: 400, ...corsHeaders });
     }
 
-    const row = db.query("SELECT * FROM games WHERE name = :param").get({param: gamename});
+    gamename.trim().toLowerCase();
+
+    const row = db.query("SELECT * FROM games WHERE name = ?").get(gamename);
 
     if (!row) {
       return new Response("Game couldn't be found in the database", { status: 404, ...corsHeaders });
     } else {
       db.run("DELETE FROM games WHERE name = ?", [gamename]);
+      db.run("DELETE FROM votes WHERE game_name = ?", [gamename])
       return new Response("Game removed!", { status: 200, ...corsHeaders });
     }
   } catch (error) {

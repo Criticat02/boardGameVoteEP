@@ -1,12 +1,8 @@
-// createUser.ts
+// user.ts
 
 import { corsHeaders } from './config.ts';
 
-export async function getCookieUsername(req: Request): Promise<string | void> {
-  return req.headers.get('Cookie')?.split('; ').find(row => row.startsWith('user='))?.split('=')[1];
-}
-
-export async function createUser(req: Request): Promise<Response> {
+export async function checkUser(req: Request): Promise<Response> {
   try {
     const reqText = await req.text();
     const parsedBody = JSON.parse(reqText);
@@ -15,7 +11,12 @@ export async function createUser(req: Request): Promise<Response> {
     if (!username) {
       return new Response("User name is required", { status: 400 , ...corsHeaders});
     }
-    return new Response("User added!", { status: 201, headers: { 'Set-Cookie': `user=${username}; Path=/vote; HttpOnly; SameSite=Lax`, ...corsHeaders.headers } });
+
+    username.trim().toLowerCase();
+    if (username.length <= 0) {
+      return new Response("User name wasn't composed of valid characters", { status: 400, ...corsHeaders });
+    }
+    return new Response("User name is valid!", { status: 201, ...corsHeaders });
   } catch (error) {
     console.log(error);
     return new Response("Internal server error", { status: 500, ...corsHeaders });

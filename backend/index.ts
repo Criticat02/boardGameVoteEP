@@ -1,35 +1,34 @@
 // index.ts
 
 import Bun from 'bun';
-import { db, setupDatabase } from './src/database.ts';
+import db from './src/database.ts';
 import { getVote, addVote } from './src/vote.ts';
-import { createUser } from './src/user.ts';
+import { checkUser } from './src/user.ts';
 import { addGame, removeGame } from './src/game.ts';
 import { corsHeaders } from './src/config.ts';
 
-export const resetDatabase = async (): Promise<void> => {
+const resetDatabase = async (): Promise<void> => {
   try {
     setInterval(() => {
-      db.run("DELETE FROM votes");
+      db.query("DELETE FROM votes").run();
   }, 1000 * 60 * 60 * 24);
   } catch (error) {
     console.log(error);
   }
 }
 
+resetDatabase();
+
 const server = Bun.serve({
   hostname: '0.0.0.0',
   port: Bun.env.PORT || 8080,
   fetch(req) {
-    setupDatabase();
     if (req.method === 'OPTIONS') {
       const res = new Response('Departed', corsHeaders);
       return res;
     }
     if (req.method === 'GET') {
-      if (req.url.endsWith('/')) {
-        return new Response('Bun!');
-      } else if (req.url.endsWith('/vote')) {
+      if (req.url.endsWith('/vote')) {
         return getVote(req);
       } else {
         return new Response('Invalid endpoint', { status: 404 });
@@ -38,7 +37,7 @@ const server = Bun.serve({
       if (req.url.endsWith('/vote')) {
         return addVote(req);
       } else if (req.url.endsWith('/user')) {
-        return createUser(req);
+        return checkUser(req);
       } else if (req.url.endsWith('/game')) {
         return addGame(req);
       } else {

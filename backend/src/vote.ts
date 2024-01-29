@@ -1,35 +1,34 @@
 // vote.ts
 
-import { db } from './database.ts';
-import { getCookieUsername } from './user.ts';
+import db from './database.ts';
 import { corsHeaders } from './config.ts';
 
 export async function addVote(req: Request): Promise<Response> {
   try {
-    const username = await getCookieUsername(req);
+    const reqText = await req.text();
+    const parsedBody = JSON.parse(reqText);
+    const { username, gamename } = parsedBody as { username:string, gamename: string };
+
     if (!username) {
       return new Response("Username not found", { status: 404, ...corsHeaders });
     }
+    username.trim().toLowerCase();
 
     const row = db.query("SELECT * FROM votes WHERE user_name = ?").get(username);
-
     if (row) {
       return new Response("User has already voted", { status: 409, ...corsHeaders });
     } else {
-      const reqText = await req.text();
-      const parsedBody = JSON.parse(reqText);
-      const { gamename } = parsedBody as { gamename: string };
 
+      gamename.trim().toLowerCase();
       if (!gamename) {
         return new Response("Game name is required", { status: 400, ...corsHeaders });
       }
 
-      const gameId = db.query("SELECT game_id FROM games WHERE name = ?").get(gamename) as number;
-
+      const gameId = db.query("SELECT id FROM games WHERE name = ?").get(gamename) as number;
       if (!gameId) {
-        return new Response("Provided game name couldn't be found in the database", { status: 400, ...corsHeaders });
+        return new Response("Provided game name couldn't be found in the database", { status: 404, ...corsHeaders });
       } else {
-        db.run("INSERT INTO votes (game_name, user_name) VALUES (?, ?)", [gamename, username]);
+        db.query("INSERT INTO votes (game_name, user_name) VALUES (?, ?)").run(gamename, username);
         return new Response("Vote added!", { status: 201, ...corsHeaders });
       }
     }
@@ -42,12 +41,12 @@ export async function addVote(req: Request): Promise<Response> {
 export async function getVote(req: Request): Promise<Response> {
   try {
 
-    const gamename = db.query("SELECT game_name, COUNT(*) FROM votes GROUP BY game_name ORDER BY count DESC LIMIT 1").get();
+    const votedGame = db.query("SELECT game_name, COUNT(*) AS count FROM votes GROUP BY game_name ORDER BY count DESC LIMIT 1").get() as { game_name: string, count: number };
 
-    if (!gamename) {
+    if (!votedGame || !votedGame.game_name) {
       return new Response("No votes found", { status: 404, ...corsHeaders });
     } else {
-      const responseBody = { gamename: gamename };
+      const responseBody = { gamename: votedGame.game_name };
       return new Response(JSON.stringify(responseBody), { status: 200, ...corsHeaders });
     }
   } catch (error) {

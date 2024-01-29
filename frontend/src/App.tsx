@@ -1,18 +1,28 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 import LoginPage from './Login';
-import VotePage from './Vote';
+import HomePage from './Home';
+import { CookiesProvider, useCookies } from "react-cookie";
+import './App.css';
 
 function App() {
+  const [cookies, setCookie] = useCookies(["user"]);
+
+  function handleLogin(user: {username: string}) {
+    const twelveHours = 12 * 60 * 60;
+    setCookie("user", user, { path: "/", maxAge: twelveHours });
+  }
+
   return (
-    <Router>
-      <div className="App">
-        <Routes>
-          <Route path="/vote" element={<VotePage />} />
-          <Route path="/" element={<LoginPage />} />
-        </Routes>
+    <CookiesProvider>
+      <div className='App'>
+        <h1 className='App-title'>The Daily Epiphany Board Game Vote</h1>
+        {cookies.user ? (
+          <HomePage user={cookies.user} />
+        ) : (
+          <LoginPage onLogin={handleLogin} />
+        )}
       </div>
-    </Router>
+    </CookiesProvider>
   );
 }
 

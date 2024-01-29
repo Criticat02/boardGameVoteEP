@@ -2,22 +2,18 @@
   text-align: center;
 }
 
-.Vote {
-  text-align: center;
-}
-
-.Vote-title {
+.App-title {
   background-color: #282c34;
   display: flex;
   color: #9cc43c;
-  font-size: calc(30px + 2vmin);
+  font-size: calc(50px + 2vmin);
   align-items: center;
   justify-content: center;
   margin: 0px;
-  padding: 50px 0px 0px 0px;
+  padding: calc(30px + 2vmin);
 }
 
-.Vote-body {
+.App-body {
   position: absolute;
   background-color: #282c34;
   min-height: 90%;
@@ -30,16 +26,25 @@
   color: white;
 }
 
-.Vote-label-bckg {
+.App-label-bckg {
   background-color:#6e8739;
   display: block;
-  display: flex;
-  padding: 30px;
-  margin: 20px 0px;
+  padding: 50px 30px 10px 30px;
   border-radius: 5px;
 }
 
-.Vote-button {
+.App-label-input {
+  margin: 30px 0px;
+  font-size: calc(14px + 1vmin);
+  width: calc(150px + 8vmin);
+  font-weight: bold
+}
+
+.App-button-list {
+  flex-direction: row;
+}
+
+.App-button {
   background-color: #9cc43c;
   font-size: 20px;
   font-weight: bold;
@@ -50,11 +55,11 @@
   color: white;
 }
 
-.Vote-link {
+.App-link {
   color: #61dafb;
 }
 
-@keyframes Vote-logo-spin {
+@keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
   }

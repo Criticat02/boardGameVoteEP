@@ -7,4 +7,6 @@ export const setupDatabase = async (): Promise<Database> => {
   return db;
 };
 
-export const db = await setupDatabase();
+const db = await setupDatabase();
+
+export default db;
