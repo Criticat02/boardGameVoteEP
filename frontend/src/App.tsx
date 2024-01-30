@@ -15,7 +15,7 @@ function App() {
   return (
     <CookiesProvider>
       <div className='App'>
-        <h1 className='App-title'>The Daily Epiphany Board Game Vote</h1>
+        <h1 className='App-title'>The Daily Epiphanie Board Game Vote</h1>
         {cookies.user ? (
           <HomePage user={cookies.user} />
         ) : (
